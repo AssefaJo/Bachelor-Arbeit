@@ -65,6 +65,7 @@ v<-Morpho:::orp(proc$rotated)[,,2]-proc$mshape
 sum(diag(v%*%t(x)))#prüfe orthogonalistät (nahezu orthogonal)
 
 
+#Beispielrechnung für expo und loga:
 x<-proc$mshape
 #Beispiel shape y
 y<-proc$rotated[,,3]
