@@ -74,6 +74,6 @@ y<-proc$rotated[,,3]
 v<-loga(x,y)
 
 #Vergleiche expo(x,v) mit dem tatsächlichen Wert von y
-y-expo(x,v)#Wieso ist dies nicht null? Fehler Im code oder Ungenauigkeit des Verfahrens?
+y-expo(x,v)#Wieso ist dies nicht null? Fehler Im code oder Ungenauigkeit des Algorithmus?
 
 
