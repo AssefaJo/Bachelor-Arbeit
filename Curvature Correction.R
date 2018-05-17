@@ -24,7 +24,7 @@ expo <- function(x,v){
     #Berechnung des k*m dimensionalen shapes als vektor
     e <- cos(nv)*x_vec+sin(nv)*(nx*v_vec)/nv
     
-    #Umwandlung in eine Configuration Matrix
+    #Umwandlung in ein 3D array
     matrix(e, nrow = k, ncol = m, byrow=TRUE)
     
   }
@@ -34,6 +34,9 @@ expo <- function(x,v){
 
 #Riemannscher Logarithmus
 loga <- function(x,y){
+  
+  k <- nrow(x)
+  m <- ncol(x)
   
   #x und y zu Vektor umschreiben
   x_vec <- as.vector(t(x))
@@ -50,7 +53,10 @@ loga <- function(x,y){
   pi <- x_vec*sum(x_vec*y_vec)/nx^2
   
   #Berechnung und Ausgabe des Vektors im Tangentialraum von x
-  (t*(y_vec-pi))/norm_vec(y_vec-pi)
+  vec<-(t*(y_vec-pi))/norm_vec(y_vec-pi)
+  
+  #Umwandlung in ein 3D array
+  matrix(vec, nrow = k, ncol = m, byrow=TRUE)
 }
 
 
@@ -72,7 +78,7 @@ y<-proc$rotated[,,3]
 
 #Erhalte v als Vektor im Tangentialraum von x
 v<-loga(x,y)
-
+v
 #Vergleiche expo(x,v) mit dem tatsächlichen Wert von y
 y-expo(x,v)#Wieso ist dies nicht null? Fehler Im code oder Ungenauigkeit des Algorithmus?
 
