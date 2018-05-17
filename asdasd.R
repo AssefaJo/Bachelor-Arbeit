@@ -2,8 +2,6 @@ library(geomorph)
 library(shapes)
 library(Morpho)
 
-data(gorf.dat)
-
 norm_vec <- function(x) sqrt(sum(x^2))
 
 #Exponentialabbilung
@@ -12,18 +10,19 @@ expo <- function(x,v){
   k <- nrow(x)
   m <- ncol(x)
   
-  #x zu Vektor umschreiben
+  #x und v zu Vektor umschreiben
   x_vec <- as.vector(t(x))
+  v_vec <- as.vector(t(v))
   
   #Bedingung: v muss orthogonal zu x sein.
-  if (sum(x_vec*v)==0){
+  if (sum(x_vec*v_vec)<0.00000001){
     
     #Norm von v und x
-    nv <- norm_vec(v)
+    nv <- norm_vec(v_vec)
     nx <- norm_vec(x_vec)
     
     #Berechnung des k*m dimensionalen shapes als vektor
-    e <- cos(nv)*x_vec+sin(nv)*(nx*v)/nv
+    e <- cos(nv)*x_vec+sin(nv)*(nx*v_vec)/nv
     
     #Umwandlung in eine Configuration Matrix
     matrix(e, nrow = k, ncol = m, byrow=TRUE)
@@ -56,16 +55,24 @@ loga <- function(x,y){
 
 
 data(boneData)
-proc <- procSym(boneLM)
-pop_sex <-name2factor(boneLM, which=3:4)
+proc <- procSym(boneLM,orp=FALSE)
 
-pcaplot3d(proc,pcshow=1:3,mag=-3)
+#Wäre das nun ein Vektor im Tangentialraum vom Meanshape?
+#der Mean shape selbst subtrahiert 
+#von der ersten orthogonalen Projektion 
+#(quasi der verbindungsvektor von Projektion und mean shape)
+v<-Morpho:::orp(proc$rotated)[,,2]-proc$mshape
+sum(diag(v%*%t(x)))#prüfe orthogonalistät (nahezu orthogonal)
 
-proc$PCs
-proc$PCscores
 
-mean <- proc$mshape
-#mean ist Punkt auf dem exp definiert ist, 
-#benötige noch implementierung normalverteilter
-#Tangentialvektoren
+x<-proc$mshape
+#Beispiel shape y
+y<-proc$rotated[,,3]
+
+#Erhalte v als Vektor im Tangentialraum von x
+v<-loga(x,y)
+
+#Vergleiche expo(x,v) mit dem tatsächlichen Wert von y
+y-expo(x,v)#Wieso ist dies nicht null? Fehler Im code oder Ungenauigkeit des Verfahrens?
+
 
