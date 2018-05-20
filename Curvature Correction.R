@@ -14,7 +14,7 @@ expo <- function(x,v){
   x_vec <- as.vector(t(x))
   v_ve <- as.vector(t(v))
   
-  #v_ve orthogonalisieren zu x
+  #v_ve nochmal zusätzlich orthogonalisieren zu x, um Fehler klein zu halten
   v_vec <- v_ve-(sum(v_ve*x_vec)*x_vec)
   
   #Norm von v und x
@@ -97,3 +97,7 @@ y_f-y_orp#Abweichung im Bereich von 10^-4
 m <- proc$orpdata[,,2]
 n <- Morpho:::orp(proc$rotated)[,,2]
 #Wieso sind m und n nicht identisch?
+
+plotshapes(proc$rotated[,,3:7], color = 3)
+plotshapes(proc$mshape,color = 4)
+#Wie kann ich diese zwei Plots in einem Schaubild plotten?
