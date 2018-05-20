@@ -94,3 +94,6 @@ y_f-y_orp#Abweichung im Bereich von 10^-4
 #wenn die obigen Implementierungen korrekt sind, kann man folgern, dass die Anwendung von loga und exp, also der Identität auf dem Tangentialraum
 #zu keiner singifikanten Abweichung führt (im Bereich 10^-6)
 
+m <- proc$orpdata[,,2]
+n <- Morpho:::orp(proc$rotated)[,,2]
+#Wieso sind m und n nicht identisch?
