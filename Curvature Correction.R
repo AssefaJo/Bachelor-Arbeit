@@ -17,23 +17,17 @@ expo <- function(x,v){
   #v_ve orthogonalisieren zu x
   v_vec <- v_ve-(sum(v_ve*x_vec)*x_vec)
   
-  #Bedingung: v muss orthogonal zu x sein.
-  if (sum(x_vec*v_vec)<0.00000001){
+  #Norm von v und x
+  nv <- norm_vec(v_vec)
+  nx <- norm_vec(x_vec)
+  #Berechnung des k*m dimensionalen shapes als vektor
+  e <- cos(nv)*x_vec+sin(nv)*(nx*v_vec)/nv
     
-    #Norm von v und x
-    nv <- norm_vec(v_vec)
-    nx <- norm_vec(x_vec)
-    
-    #Berechnung des k*m dimensionalen shapes als vektor
-    e <- cos(nv)*x_vec+sin(nv)*(nx*v_vec)/nv
-    
-    #Umwandlung in ein 3D array
-    matrix(e, nrow = k, ncol = m, byrow=TRUE)
-    
-  }
-  else{message('v nicht im Tangentialraum von x')}
+  #Umwandlung in ein 3D array    
+  matrix(e, nrow = k, ncol = m, byrow=TRUE)
+}  
   
-}
+  
 
 #Riemannscher Logarithmus
 loga <- function(x,y){
