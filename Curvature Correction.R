@@ -101,3 +101,7 @@ n <- Morpho:::orp(proc$rotated)[,,2]
 plotshapes(proc$rotated[,,3:7], color = 3)
 plotshapes(proc$mshape,color = 4)
 #Wie kann ich diese zwei Plots in einem Schaubild plotten?
+
+#Wie erhalte ich die Kovarianzmatrix?
+proc$Variance
+
