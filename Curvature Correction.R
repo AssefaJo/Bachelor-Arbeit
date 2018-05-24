@@ -12,10 +12,10 @@ expo <- function(x,v){
   
   #x und v zu Vektor umschreiben
   x_vec <- as.vector(t(x))
-  v_ve <- as.vector(t(v))
+  v_vec <- as.vector(t(v))
   
   #v_ve nochmal zusätzlich orthogonalisieren zu x, um Fehler klein zu halten
-  v_vec <- v_ve-(sum(v_ve*x_vec)*x_vec)
+  #v_vec <- v_ve-(sum(v_ve*x_vec)*x_vec)
   
   #Norm von v und x
   nv <- norm_vec(v_vec)
@@ -23,7 +23,7 @@ expo <- function(x,v){
   #Berechnung des k*m dimensionalen shapes als vektor
   e <- cos(nv)*x_vec+sin(nv)*(nx*v_vec)/nv
     
-  #Umwandlung in ein 3D array    
+  #Umwandlung in ein 2D array    
   matrix(e, nrow = k, ncol = m, byrow=TRUE)
 }  
   
@@ -52,7 +52,7 @@ loga <- function(x,y){
   #Berechnung und Ausgabe des Vektors im Tangentialraum von x
   vec<-(t*(y_vec-pi))/norm_vec(y_vec-pi)
   
-  #Umwandlung in ein 3D array
+  #Umwandlung in ein 2D array
   matrix(vec, nrow = k, ncol = m, byrow=TRUE)
 }
 
@@ -66,25 +66,29 @@ x<-proc$mshape
 #von der ersten orthogonalen Projektion 
 #(quasi der verbindungsvektor von Projektion und mean shape)
 v_orp<-proc$orpdata[,,3]-proc$mshape
-sum(diag(v%*%t(x)))#prüfe orthogonalistät (nahezu orthogonal)
+sum(diag(v%*%t(x)))#prüfe orthogonalistät von v_orp und x 
+
 
 #Beispielrechnung für expo und loga:
 x<-proc$mshape
 #Beispiel shape y
 y<-proc$rotated[,,3]
 
-#Erhalte v als 3D array im Tangentialraum von x
+#Erhalte v als 2D array im Tangentialraum von x
 v<-loga(x,y)
 
+
+#Hauptproblem:
 #Vergleiche expo(x,v)(also der Umkehrfunktion von loga) mit dem tatsächlichen Wert von y
 y-expo(x,v)#Das müsste null sein, da expo(loga()) Identität
 #Wieso ist dies nicht null? Fehler Im code oder Ungenauigkeit des Algorithmus
+
+
 
 #Vergleiche v mit v_orp
 v-v_orp#Abweichung im Bereich 10^-6
 #Dies wäre also wenn alles richtig implementiert und definiert wurde,
 #der Fehler der orthogonalen Projektion im Vergleich zum riemannschen Logarithmus.(?)
-
 
 plotshapes(proc$rotated[,,3:7], color = 3)
 plotshapes(proc$mshape,color = 4)
