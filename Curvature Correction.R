@@ -58,16 +58,15 @@ loga <- function(x,y){
 
 
 data(gorf.dat)
-proc <- procSym(gorf.dat,orp=FALSE)
+proc <- procSym(gorf.dat,orp=TRUE)
 x<-proc$mshape
 
 #Wäre das nun ein Vektor im Tangentialraum vom Meanshape?
 #der Mean shape selbst subtrahiert 
 #von der ersten orthogonalen Projektion 
 #(quasi der verbindungsvektor von Projektion und mean shape)
-v_orp<-Morpho:::orp(proc$rotated)[,,3]-proc$mshape
+v_orp<-proc$orpdata[,,3]-proc$mshape
 sum(diag(v%*%t(x)))#prüfe orthogonalistät (nahezu orthogonal)
-
 
 #Beispielrechnung für expo und loga:
 x<-proc$mshape
@@ -83,11 +82,9 @@ y-expo(x,v)#Das müsste null sein, da expo(loga()) Identität
 
 #Vergleiche v mit v_orp
 v-v_orp#Abweichung im Bereich 10^-6
+#Dies wäre also wenn alles richtig implementiert und definiert wurde,
+#der Fehler der orthogonalen Projektion im Vergleich zum riemannschen Logarithmus.(?)
 
-
-m <- proc$orpdata[,,2]
-n <- Morpho:::orp(proc$rotated)[,,2]
-#Wieso sind m und n nicht identisch?
 
 plotshapes(proc$rotated[,,3:7], color = 3)
 plotshapes(proc$mshape,color = 4)
