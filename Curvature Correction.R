@@ -60,6 +60,7 @@ loga <- function(x,y){
 data(gorf.dat)
 proc <- procSym(gorf.dat,orp=FALSE)
 x<-proc$mshape
+
 #Wäre das nun ein Vektor im Tangentialraum vom Meanshape?
 #der Mean shape selbst subtrahiert 
 #von der ersten orthogonalen Projektion 
@@ -83,16 +84,6 @@ y-expo(x,v)#Das müsste null sein, da expo(loga()) Identität
 #Vergleiche v mit v_orp
 v-v_orp#Abweichung im Bereich 10^-6
 
-#Vergleiche y mit Projektion von y
-y_orp <- Morpho:::orp(proc$rotated)[,,3]
-y-y_orp#Abweichung im Bereich von 10^-4
-
-#Vergleiche den durch exp und loga berechneten Wert von y mit Projektion von y
-y_f <- expo(x,v)
-y_f-y_orp#Abweichung im Bereich von 10^-4
-
-#wenn die obigen Implementierungen korrekt sind, kann man folgern, dass die Anwendung von loga und exp, also der Identität auf dem Tangentialraum
-#zu keiner singifikanten Abweichung führt (im Bereich 10^-6)
 
 m <- proc$orpdata[,,2]
 n <- Morpho:::orp(proc$rotated)[,,2]
@@ -102,6 +93,5 @@ plotshapes(proc$rotated[,,3:7], color = 3)
 plotshapes(proc$mshape,color = 4)
 #Wie kann ich diese zwei Plots in einem Schaubild plotten?
 
-#Wie erhalte ich die Kovarianzmatrix?
-proc$Variance
-
+#Gibt es einen Befehl, der mich direkt zu der Kovarianzmatrix führt, 
+#oder muss man diese indirekt berechnen mit den EW und PCs?
