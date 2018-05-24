@@ -82,7 +82,8 @@ v<-loga(x,y)
 #Vergleiche expo(x,v)(also der Umkehrfunktion von loga) mit dem tatsächlichen Wert von y
 y-expo(x,v)#Das müsste null sein, da expo(loga()) Identität
 #Wieso ist dies nicht null? Fehler Im code oder Ungenauigkeit des Algorithmus
-
+#Ich habe den Code für sehr leichte Zahlenbeispiele getestet
+#Dabei erhalte ich durchaus das Ergebnis das expo(loga()) die Identität ist.
 
 
 #Vergleiche v mit v_orp
