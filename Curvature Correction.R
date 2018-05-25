@@ -58,7 +58,9 @@ loga <- function(x,y){
 
 
 data(gorf.dat)
+#Performing Procrustes Superimposition on gorf.dat
 proc <- procSym(gorf.dat,orp=TRUE)
+#Mean shape x
 x<-proc$mshape
 
 #Wäre das nun ein Vektor im Tangentialraum vom Meanshape?
