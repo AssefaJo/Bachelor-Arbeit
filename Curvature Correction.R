@@ -4,6 +4,9 @@ library(Morpho)
 
 norm_vec <- function(x) sqrt(sum(x^2))
 
+#Norm_arr normiert ein 2D-array x auf Norm 1
+Norm_arr <- function(x) x/(sqrt(sum(diag(t(x)%*%x))))
+
 #Exponentialabbilung
 expo <- function(x,v){
   
@@ -20,8 +23,9 @@ expo <- function(x,v){
   #Norm von v und x
   nv <- norm_vec(v_vec)
   nx <- norm_vec(x_vec)
+  
   #Berechnung des k*m dimensionalen shapes als vektor
-  e <- cos(nv)*x_vec+sin(nv)*(nx*v_vec)/nv
+  e <- cos(nv)*x_vec+((sin(nv)*nx)/nv)*v_vec
     
   #Umwandlung in ein 2D array    
   matrix(e, nrow = k, ncol = m, byrow=TRUE)
@@ -43,11 +47,16 @@ loga <- function(x,y){
   ny <- norm_vec(y_vec)
   nx <- norm_vec(x_vec)
   
+  #y normieren
+  
+  #y_vec <- y_ve/n
+  #ny <- norm_vec(y_vec)
+  
   #theta
   t <- acos(abs(sum(x_vec*y_vec))/(nx*ny))
   
   #Projektion von y auf x
-  pi <- x_vec*sum(x_vec*y_vec)/nx^2
+  pi <- (x_vec*sum(x_vec*y_vec))/(nx^2)
   
   #Berechnung und Ausgabe des Vektors im Tangentialraum von x
   vec<-(t*(y_vec-pi))/norm_vec(y_vec-pi)
@@ -75,18 +84,20 @@ sum(diag(v%*%t(x)))#prüfe orthogonalistät von v_orp und x
 x<-proc$mshape
 #Beispiel shape y
 y<-proc$rotated[,,8]
+#y normieren, um Fehler gering zu halten
+p<-Norm_arr(y)
 
 #Erhalte v als 2D array im Tangentialraum von x
-v<-loga(x,y)
+v<-loga(x,p)
+
 
 
 #Hauptproblem:
 #Vergleiche expo(x,v)(also der Umkehrfunktion von loga) mit dem tatsächlichen Wert von y
-y-expo(x,v)#Das müsste null sein, da expo(loga()) Identität
-#Wieso ist dies nicht null? Fehler Im code oder Ungenauigkeit des Algorithmus
-#Ich habe den Code für sehr leichte Zahlenbeispiele getestet
-#Dabei erhalte ich durchaus das Ergebnis, dass expo(loga()) die Identität ist.
-
+p-expo(x,v)
+#Dies ist nahezu null (im bereich 10^-17). Jedoch ohne vorangehende Normierung von y 
+#Ist der Fehler recht groß (im bereich 10^-4). 
+#Jetzt bleibt die Frage ob besagte Normierung von y vernachlässigbar ist.
 
 #Vergleiche v mit v_orp
 v-v_orp#Abweichung im Bereich 10^-6
