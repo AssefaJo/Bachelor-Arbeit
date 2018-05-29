@@ -65,7 +65,7 @@ x<-proc$mshape
 
 #Wäre das nun ein Vektor im Tangentialraum vom Meanshape?
 #der Mean shape selbst subtrahiert 
-#von der ersten orthogonalen Projektion 
+#von der dritten orthogonalen Projektion 
 #(quasi der verbindungsvektor von Projektion und mean shape)
 v_orp<-proc$orpdata[,,3]-proc$mshape
 sum(diag(v%*%t(x)))#prüfe orthogonalistät von v_orp und x 
@@ -74,7 +74,7 @@ sum(diag(v%*%t(x)))#prüfe orthogonalistät von v_orp und x
 #Beispielrechnung für expo und loga:
 x<-proc$mshape
 #Beispiel shape y
-y<-proc$rotated[,,3]
+y<-proc$rotated[,,8]
 
 #Erhalte v als 2D array im Tangentialraum von x
 v<-loga(x,y)
@@ -93,9 +93,20 @@ v-v_orp#Abweichung im Bereich 10^-6
 #Dies wäre also wenn alles richtig implementiert und definiert wurde,
 #der Fehler der orthogonalen Projektion im Vergleich zum riemannschen Logarithmus.(?)
 
-plotshapes(proc$rotated[,,3:7], color = 3)
-plotshapes(proc$mshape,color = 4)
+
+plotshapes(gorf.dat[,,3:15])
+plotshapes(proc$rotated[,,3:15], color = 3)
+
+
+#Folgende plots gilt es zu vergleichen:
+plotshapes(proc$orpdata[,,3])
+plotshapes(x+loga(x,proc$rotated[,,3]))
+#lineplot?
 #Wie kann ich diese zwei Plots in einem Schaubild plotten?
+
+(x+loga(x,proc$rotated[,,3]))-proc$orpdata[,,3]
+#Abweichung der orthogonalen Projektion des shape in den Tangentialraum.
+#10^-6
 
 #Gibt es einen Befehl, der mich direkt zu der Kovarianzmatrix führt, 
 #oder muss man diese indirekt berechnen mit den EW und PCs?
