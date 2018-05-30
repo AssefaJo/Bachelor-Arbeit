@@ -121,3 +121,7 @@ plotshapes(x+loga(x,proc$rotated[,,3]))
 
 #Gibt es einen Befehl, der mich direkt zu der Kovarianzmatrix führt, 
 #oder muss man diese indirekt berechnen mit den EW und PCs?
+
+gamma<-matrix(proc$PCs,nrow = 16)
+lambda<-diag(proc$eigenvalues)
+cov<-gamma%*%lambda%*%t(gamma)#Kovarianzmatrix
