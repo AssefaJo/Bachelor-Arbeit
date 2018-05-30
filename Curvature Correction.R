@@ -5,7 +5,7 @@ library(Morpho)
 norm_vec <- function(x) sqrt(sum(x^2))
 
 #Norm_arr normiert ein 2D-array x auf Norm 1
-Norm_arr <- function(x) x/(sqrt(sum(diag(t(x)%*%x))))
+norm_arr <- function(x) sqrt(sum(diag(t(x)%*%x)))
 
 #Exponentialabbilung
 expo <- function(x,v){
@@ -76,33 +76,35 @@ x<-proc$mshape
 #der Mean shape selbst subtrahiert 
 #von der dritten orthogonalen Projektion 
 #(quasi der verbindungsvektor von Projektion und mean shape)
-v_orp<-proc$orpdata[,,3]-proc$mshape
-sum(diag(v%*%t(x)))#prüfe orthogonalistät von v_orp und x 
-
+v_orp<-proc$orpdata[,,8]-proc$mshape
 
 #Beispielrechnung für expo und loga:
 x<-proc$mshape
 #Beispiel shape y
 y<-proc$rotated[,,8]
 #y normieren, um Fehler gering zu halten
-p<-Norm_arr(y)
+p<-y/norm_arr(y)
 
 #Erhalte v als 2D array im Tangentialraum von x
+#Wende Logarithmus einmal auf y und einmal auf y normiert (p) an.
 v<-loga(x,p)
-
-
+w<-loga(x,y)
+v-w#Im Bereich 10^-16, also ist die Normierung vernachlässigbar.
 
 #Hauptproblem:
-#Vergleiche expo(x,v)(also der Umkehrfunktion von loga) mit dem tatsächlichen Wert von y
-p-expo(x,v)
-#Dies ist nahezu null (im bereich 10^-17). Jedoch ohne vorangehende Normierung von y 
-#Ist der Fehler recht groß (im bereich 10^-4). 
-#Jetzt bleibt die Frage ob besagte Normierung von y vernachlässigbar ist.
+#Wenn man jedoch erneut expo anwendet scheint die Normierung einen signifikanten Unterschied zu machen.
+p-expo(x,v)#Im Bereich 10^-15
+y-expo(x,w)#Im Bereich 10^-4
+
 
 #Vergleiche v mit v_orp
-v-v_orp#Abweichung im Bereich 10^-6
+v-v_orp
+w-v_orp#Beides Abweichung im Bereich 10^-6
 #Dies wäre also wenn alles richtig implementiert und definiert wurde,
-#der Fehler der orthogonalen Projektion im Vergleich zum riemannschen Logarithmus.(?)
+#der Fehler der orthogonalen Projektion im Vergleich zum riemannschen Logarithmus.
+
+(x+loga(x,p))-proc$orpdata[,,8]#10^-5
+#Abweichung der orthogonalen Projektion des shape in den Tangentialraum.
 
 
 plotshapes(gorf.dat[,,3:15])
@@ -115,9 +117,7 @@ plotshapes(x+loga(x,proc$rotated[,,3]))
 #lineplot?
 #Wie kann ich diese zwei Plots in einem Schaubild plotten?
 
-(x+loga(x,proc$rotated[,,3]))-proc$orpdata[,,3]
-#Abweichung der orthogonalen Projektion des shape in den Tangentialraum.
-#10^-6
+
 
 #Gibt es einen Befehl, der mich direkt zu der Kovarianzmatrix führt, 
 #oder muss man diese indirekt berechnen mit den EW und PCs?
