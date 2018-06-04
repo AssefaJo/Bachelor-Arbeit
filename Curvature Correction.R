@@ -4,7 +4,7 @@ library(Morpho)
 
 norm_vec <- function(x) sqrt(sum(x^2))
 
-#Norm_arr normiert ein 2D-array x auf Norm 1
+#>Gibt die euklidische Norm eines 2d-arrays zurück
 norm_arr <- function(x) sqrt(sum(diag(t(x)%*%x)))
 
 #Exponentialabbilung
@@ -67,61 +67,133 @@ loga <- function(x,y){
 
 
 data(gorf.dat)
+
 #Performing Procrustes Superimposition on gorf.dat
 proc <- procSym(gorf.dat,orp=TRUE)
+
 #Mean shape x
-x<-proc$mshape
+x <- proc$mshape
+
+#Beispielshape
+y <- proc$rotated[,,8]
+y_orp <- proc$orpdata[,,8]
+
+
+
+#Beispielrechnungen:
 
 #Wäre das nun ein Vektor im Tangentialraum vom Meanshape?
 #der Mean shape selbst subtrahiert 
-#von der dritten orthogonalen Projektion 
+#von der orthogonalen Projektion eines shape
 #(quasi der verbindungsvektor von Projektion und mean shape)
-v_orp<-proc$orpdata[,,8]-proc$mshape
+v_orp <- y_orp-x
 
-#Beispielrechnung für expo und loga:
-x<-proc$mshape
-#Beispiel shape y
-y<-proc$rotated[,,8]
-#y normieren, um Fehler gering zu halten
-p<-y/norm_arr(y)
+v_orp - loga(x,expo(x,v_orp))
+#Die identität hat eine Abweichung im Bereich 10^-17. Scheint also richtig zu sein.
 
-#Erhalte v als 2D array im Tangentialraum von x
-#Wende Logarithmus einmal auf y und einmal auf y normiert (p) an.
-v<-loga(x,p)
-w<-loga(x,y)
-v-w#Im Bereich 10^-16, also ist die Normierung vernachlässigbar.
+norm_arr(proc$rotated[,,8])
+#Wieso ist die Norm von meinen Shapes nicht 1? Skalierungsinvarianz?
+#Oder geht man hier von dem Procrustes distance aus?
 
-#Hauptproblem:
-#Wenn man jedoch erneut expo anwendet scheint die Normierung einen signifikanten Unterschied zu machen.
-p-expo(x,v)#Im Bereich 10^-15
-y-expo(x,w)#Im Bereich 10^-4
+(x+loga(x,y))-proc$orpdata[,,8]#10^-5
+#Abweichung des mit log berechneten, exakten shapes im Tangentialraum von der othogonalen Projektion im Tangentialraum.
 
 
-#Vergleiche v mit v_orp
-v-v_orp
-w-v_orp#Beides Abweichung im Bereich 10^-6
-#Dies wäre also wenn alles richtig implementiert und definiert wurde,
-#der Fehler der orthogonalen Projektion im Vergleich zum riemannschen Logarithmus.
 
-(x+loga(x,p))-proc$orpdata[,,8]#10^-5
-#Abweichung der orthogonalen Projektion des shape in den Tangentialraum.
+#Fragen zu den plots:
 
-
+#Wie kann ich folgende zwei Plots in einem Schaubild plotten?
 plotshapes(gorf.dat[,,3:15])
 plotshapes(proc$rotated[,,3:15], color = 3)
 
+#lines(c(-200,250),c(0,0))
+#lines(c(0,0),c(-100,300))
 
 #Folgende plots gilt es zu vergleichen:
 plotshapes(proc$orpdata[,,3])
 plotshapes(x+loga(x,proc$rotated[,,3]))
+#Wie kann ich diese zwei Plots in einem Schaubild plotten? Mit linien.
 #lineplot?
-#Wie kann ich diese zwei Plots in einem Schaubild plotten?
 
 
 
-#Gibt es einen Befehl, der mich direkt zu der Kovarianzmatrix führt, 
+#Kovarianz und PCs:
+
+proc$PCs
+#Liefern mir die PCs eine Basis im Tangentialraum meines mean shape?
+t(proc$PCs[,2])%*%as.vector(x)#skalarprodukt von mean shape und PC. 10^-16
+#mean shape und PC stehen also orthogonal zueinander.
+#Also PCs Basis von Tangentialraum(?).
+
+#Gibt es einen Befehl, der mich direkt zu der Kovarianzmatrix von gorf.dat führt, 
 #oder muss man diese indirekt berechnen mit den EW und PCs?
 
-gamma<-matrix(proc$PCs,nrow = 16)
-lambda<-diag(proc$eigenvalues)
-cov<-gamma%*%lambda%*%t(gamma)#Kovarianzmatrix
+
+
+
+#Simulation von shapes im Tangentialraum (mit Annahme PCs bilden Basis vom Tangentialraum):
+
+#Generiere array e mit 10 normalverteilten 12-dimensionalen Vektoren, die verteilt sind zu N(0,id).
+e<-array(0,c(12,10))
+for(i in 1:10){e[,i]<-as.vector(rnorm(12,mean=0,sd=1))}
+
+#12x12 Kovarianzmatrix mit Bsp.: 0.5 auf Diagonalen
+cov<-diag(rep(0.5,times=12))
+
+#Multipliziere jeden generierten Zufallsvektor aus e mit cov und erhalte neue Vektoren 
+#die verteilt sind zu N(0,cov*t(cov))
+E<-array(0,c(12,10))
+for(i in 1:10){E[,i]<-cov%*%e[,i]}
+
+#Die wichtigste Frage bleibt: Bilden die PCs aus gorf.dat eine Basis des Tangentialraums?
+#Basis b von T_xM mit PCs:
+b<-proc$PCs
+
+#Erhalte nun einen shape X im Tangentialraum aus folgender Linearkombination:
+# X_1 = x+(b_1 * E_11 + .. + b_m* E_m1)
+#x ist der mean shape.
+#b_i ist ein Basisvektor, also die i-te Spalte von b.
+#E_ij ist der i-j-te Eintrag der Matrix E. Also nehmen wir für einen shape einen Spaltenvektor aus E
+#und jeder Eintrag ist ein Koeffizient für den zugehörigen Basisvektor (-> Harms).
+
+#Erstelle leeres 16 dim. array
+t<-as.vector(array(0,c(1,16)))
+
+#t<-(b_1 * E_11 + .. + b_m* E_m1)
+for(i in 1:12){t<-t+b[,i]*E[i,1]}
+
+#Ich habe Angst hier durcheinander zu kommen mit der Vektornotation von shapes und der Matrixnotation. 
+#Da ich oft die Matrix umschrieben muss als Vektor, aber ich mir nicht sicher bin ob zeilenweise oder spaltenweise. Tipp?
+
+#Addiere mean shape
+w<- x+t
+
+#Erhalte shape im Tangentialraum. Tada.
+w
+
+#Und damit einen shape auf meinem shape space
+z<-expo(x,w)
+
+#Wenn alles richtig ist habe ich nun mittels der PCs aus gorf.dat und der neuen Kovarianzmatrix einen neuen shape kreiert.
+#Er sieht sogar ganz gut aus.
+plotshapes(z)
+
+#Nun gilt es mit den simulierten Daten den Fehler der orthogonalen Projektion zu bestimmen.
+#Wie bestimme ich nun die orthogonale Projektion von z? 
+#....
+
+
+#Unser generierter Vektor ist sogar orthogonal zum mean-shape.
+t(t)%*%as.vector(x)#10^-15
+
+
+
+
+#Ignorieren:
+#plot(c(1,1,2,1),c(1,1.5,1,1),pch=20,col="blue",xlim = c(-1,2),ylim = c(-1,2),xlab = "x",ylab = "y")
+#lines(c(1,1,2,1),c(1,1.5,1,1))
+#lines(c(0,0),c(-2,3))
+#lines(c(-2,3),c(0,0))
+#points(c(-1/3,-1/3,2/3,-1/3),c(1-(3.5/3),1.5-(3.5/3),1-(3.5/3),1-(3.5/3)),pch=20,col="red")
+#lines(c(-1/3,-1/3,2/3,-1/3),c(1-(3.5/3),1.5-(3.5/3),1-(3.5/3),1-(3.5/3)))
+#arrows(0.9,0.9,0.3,0.3,angle = 30,length=0.18)
