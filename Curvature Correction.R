@@ -180,7 +180,8 @@ for(i in 1:10){z[,,i]<-expo(x,t[,i])}
 #Sieht sogar so ähnlich aus wie gorf.dat. 
 plotshapes(z)
 plotshapes(proc$rotated[,,1:10])
-
+#Umso geringer die Varianzen, desto genauer werden die shapes.
+#Wieder die Frage: Wie plotte ich das in einem Fenster?
 
 #Nun gilt es mit den simulierten Daten den Fehler der orthogonalen Projektion zu bestimmen.
 #Wie bestimme ich nun die orthogonale Projektion von z? 
