@@ -4,8 +4,8 @@ library(Morpho)
 
 norm_vec <- function(x) sqrt(sum(x^2))
 
-#>Gibt die euklidische Norm eines 2d-arrays zurück
-norm_arr <- function(x) sqrt(sum(diag(t(x)%*%x)))
+#Gibt die euklidische Norm eines 2d-arrays zurück
+norm_arr <- function(x) norm_vec(as.vector(x))
 
 #Exponentialabbilung
 expo <- function(x,v){
@@ -14,8 +14,8 @@ expo <- function(x,v){
   m <- ncol(x)
   
   #x und v zu Vektor umschreiben
-  x_vec <- as.vector(t(x))
-  v_vec <- as.vector(t(v))
+  x_vec <- as.vector(x)
+  v_vec <- as.vector(v)
   
   #Norm von v und x
   nv <- norm_vec(v_vec)
@@ -25,7 +25,7 @@ expo <- function(x,v){
   e <- cos(nv)*x_vec+((sin(nv)*nx)/nv)*v_vec
     
   #Umwandlung in ein 2D array    
-  matrix(e, nrow = k, ncol = m, byrow=TRUE)
+  matrix(e, nrow = k, ncol = m, byrow=FALSE)
 }  
   
   
@@ -37,8 +37,8 @@ loga <- function(x,y){
   m <- ncol(x)
   
   #x und y zu Vektor umschreiben
-  x_vec <- as.vector(t(x))
-  y_vec <- as.vector(t(y))
+  x_vec <- as.vector(x)
+  y_vec <- as.vector(y)
   
   #Norm von y und x
   ny <- norm_vec(y_vec)
@@ -59,7 +59,7 @@ loga <- function(x,y){
   vec<-(t*(y_vec-pi))/norm_vec(y_vec-pi)
   
   #Umwandlung in ein 2D array
-  matrix(vec, nrow = k, ncol = m, byrow=TRUE)
+  matrix(vec, nrow = k, ncol = m, byrow=FALSE)
 }
 
 
@@ -135,10 +135,10 @@ e<-array(0,c(12,10))
 for(i in 1:10){e[,i]<-as.vector(rnorm(12,mean=0,sd=1))}
 
 #12x12 Kovarianzmatrix mit Bsp.: 0.03 auf Diagonalen
-cov<-diag(rep(0.03,times=12))
+cov<-diag(rep(0.7,times=12))
 
 #oder 0.05
-cov<-diag(c(0.5,rep(0.05,times=11)))
+cov<-diag(c(0.8,rep(0.05,times=11)))
 
 #Multipliziere jeden generierten Zufallsvektor aus e mit cov und erhalte neue Vektoren 
 #die verteilt sind zu N(0,cov*t(cov))
@@ -175,7 +175,7 @@ for(i in 1:10){w[,i]<-x+t[,i]}
 #Erhalte 10 shapes im Tangentialraum. Tada.
 w
 
-z<-array(0,c(8,2,10))
+z <- array(0,c(8,2,10))
 #Und damit 10 shapes auf meinem shape space
 for(i in 1:10){z[,,i]<-expo(x,t[,i])}
 
@@ -187,9 +187,35 @@ plotshapes(proc$rotated[,,1:10])
 #Wieder die Frage: Wie plotte ich das in einem Fenster?
 
 #Nun gilt es mit den simulierten Daten den Fehler der orthogonalen Projektion zu bestimmen.
-#Wie bestimme ich nun die orthogonale Projektion von z? 
-#....
 
+
+#Hier erstmal den mit log bestimmten exakten Wert von z im Tangentialraum. 
+z_t <- array(0,c(8,2,10))
+for(i in 1:10){z_t[,,i]<-loga(x,z[,,i])}
+
+#Exakter Wert von z_t hat eine Abweichung von 10^-16 (verursacht von log(exp())).
+as.vector(z_t[,,2])-t[,2]
+
+#Damit folgt für den shape im Tangentialraum:
+z_exakt<-array(0,c(8,2,10))
+for(i in 1:10){z_exakt[,,i]<-z_t[,,i]+x}
+
+#Projiziere z orthogonal in den Tangentialraum von x
+z_orp <- Morpho:::orp(z, mshape =x)
+#Ist das so korrekt?
+
+#In den zwei plots sieht man den Unterschied von z_orp und z
+plotshapes(z_orp)
+plotshapes(z_exakt)
+
+#Die aktuelle Differenz von z_orp und dem exakten Wert des shapes im Tangentialraum.
+norm_arr(z_orp[,,2])-norm_arr(z_exakt[,,2])
+
+#oder in Koordinaten:
+z_orp[,,2]-(z_exakt[,,2])
+#Damit wäre die Abweichung der orthogonalen Projektion gezeigt. 
+#Dies kann man für unterschiedlichstes cov ausführen und somit 
+#stärkere Abweichungen für größere Varianz und schwäche Abweichungen für geringere Varianz feststellen.
 
 
 
