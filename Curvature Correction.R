@@ -157,37 +157,39 @@ b<-proc$PCs
 #und jeder Eintrag ist ein Koeffizient für den zugehörigen Basisvektor (-> Harms).
 
 #Erstelle leeres 16 dim. array
-t<-as.vector(array(0,c(1,16)))
+w<-array(0,c(16,10))
+t<-array(0,c(16,10))
 
 #t<-(b_1 * E_11 + .. + b_m* E_m1)
-for(i in 1:12){t<-t+b[,i]*E[i,1]}
+for(j in 1:10){for(i in 1:12){t[,j]<-t[,j]+(b[,i]*E[i,j])}}
 
 #Ich habe Angst hier durcheinander zu kommen mit der Vektornotation von shapes und der Matrixnotation. 
 #Da ich oft die Matrix umschrieben muss als Vektor, aber ich mir nicht sicher bin ob zeilenweise oder spaltenweise. Tipp?
 
 #Addiere mean shape
-w<- x+t
-
-#Erhalte shape im Tangentialraum. Tada.
+for(i in 1:10){w[,i]<-x+t[,i]}
+w
+#Erhalte 10 shapes im Tangentialraum. Tada.
 w
 
-#Und damit einen shape auf meinem shape space
-z<-expo(x,w)
+z<-array(0,c(2,8,10))
+#Und damit 10 shapes auf meinem shape space
+for(i in 1:10){z[,,i]<-expo(x,t[,i])}
 
-#Wenn alles richtig ist habe ich nun mittels der PCs aus gorf.dat und der neuen Kovarianzmatrix einen neuen shape kreiert.
-#Er sieht sogar ganz gut aus.
+#Wenn alles richtig ist habe ich nun mittels der PCs aus gorf.dat und der neuen Kovarianzmatrix neue shapes simuliert.
+#Sieht aber nicht so aus wie meine Daten aus gorf.dat. Stimmt hier irgendwas nicht?
 plotshapes(z)
-
+norm_arr(z[,,1])
 #Nun gilt es mit den simulierten Daten den Fehler der orthogonalen Projektion zu bestimmen.
 #Wie bestimme ich nun die orthogonale Projektion von z? 
 #....
 
 
 #Unser generierter Vektor ist sogar orthogonal zum mean-shape.
-t(t)%*%as.vector(x)#10^-15
+t(t[,1])%*%as.vector(x)#10^-15
 
-
-
+neu<-procSym(z)
+plotshapes(neu$rotated)
 
 #Ignorieren:
 #plot(c(1,1,2,1),c(1,1.5,1,1),pch=20,col="blue",xlim = c(-1,2),ylim = c(-1,2),xlab = "x",ylab = "y")
