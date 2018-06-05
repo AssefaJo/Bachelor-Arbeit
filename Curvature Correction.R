@@ -135,7 +135,7 @@ e<-array(0,c(12,10))
 for(i in 1:10){e[,i]<-as.vector(rnorm(12,mean=0,sd=1))}
 
 #12x12 Kovarianzmatrix mit Bsp.: 0.03 auf Diagonalen
-cov<-diag(rep(0.02,times=12))
+cov<-diag(rep(0.04,times=12))
 
 #oder 0.05
 #cov<-diag(c(0.8,rep(0.05,times=11)))
@@ -201,7 +201,7 @@ plotshapes(z_orp)
 plotshapes(z_exakt)
 
 #Der Abstand von z_orp und dem exakten Wert des shapes im Tangentialraum.
-for(i in 1:10){message(norm_arr(z_orp[,,i])-norm_arr(z_exakt[,,i]))}
+for(i in 1:10){message(norm_arr(z_orp[,,i]-z_exakt[,,i]))}
 
 #Damit wäre die Abweichung der orthogonalen Projektion gezeigt. 
 #Dies kann man für unterschiedlichstes cov ausführen und somit 
