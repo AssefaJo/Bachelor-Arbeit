@@ -1,4 +1,4 @@
-library(geomorph)
+library(matlib)
 library(shapes)
 library(Morpho)
 
@@ -135,7 +135,7 @@ e<-array(0,c(12,10))
 for(i in 1:10){e[,i]<-as.vector(rnorm(12,mean=0,sd=1))}
 
 #12x12 Kovarianzmatrix mit Bsp.: 0.03 auf Diagonalen
-cov<-diag(rep(0.04,times=12))
+cov<-diag(rep(0.1,times=12))
 
 #oder 0.05
 #cov<-diag(c(0.8,rep(0.05,times=11)))
@@ -203,12 +203,26 @@ plotshapes(z_exakt)
 #Der Abstand von z_orp und dem exakten Wert des shapes im Tangentialraum.
 for(i in 1:10){message(norm_arr(z_orp[,,i]-z_exakt[,,i]))}
 
+
 #Damit wäre die Abweichung der orthogonalen Projektion gezeigt. 
 #Dies kann man für unterschiedlichstes cov ausführen und somit 
 #stärkere Abweichungen für größere Varianz und schwäche Abweichungen für geringere Varianz feststellen.
 
+cov_e<-matrix(0,nrow = 16,ncol = 16)
+cov_o<-matrix(0,nrow = 16,ncol = 16)
 
+#Kovarianzmatrix von den exakten und orthogonalen shapes
+for(i in 1:10){cov_e<-cov_e+(1/10)*(as.vector(z_exakt[,,i]-x)%*%t(as.vector(z_exakt[,,i]-x)))}
+for(i in 1:10){cov_o<-cov_o+(1/10)*(as.vector(z_orp[,,i]-x)%*%t(as.vector(z_orp[,,i]-x)))}
 
+#Spectral Composition
+EDe<-eigen(cov_e)
+EDo<-eigen(cov_o)
+
+#Untersuchung der Eigenwerte
+EDe$values
+EDo$values
+#?
 
 #Ignorieren:
 #plot(c(1,1,2,1),c(1,1.5,1,1),pch=20,col="blue",xlim = c(-1,2),ylim = c(-1,2),xlab = "x",ylab = "y")
