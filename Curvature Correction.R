@@ -135,10 +135,10 @@ e<-array(0,c(12,10))
 for(i in 1:10){e[,i]<-as.vector(rnorm(12,mean=0,sd=1))}
 
 #12x12 Kovarianzmatrix mit Bsp.: 0.03 auf Diagonalen
-cov<-diag(rep(0.7,times=12))
+cov<-diag(rep(0.02,times=12))
 
 #oder 0.05
-cov<-diag(c(0.8,rep(0.05,times=11)))
+#cov<-diag(c(0.8,rep(0.05,times=11)))
 
 #Multipliziere jeden generierten Zufallsvektor aus e mit cov und erhalte neue Vektoren 
 #die verteilt sind zu N(0,cov*t(cov))
@@ -166,35 +166,27 @@ for(j in 1:10){for(i in 1:12){t[,j]<-t[,j]+(b[,i]*E[i,j])}}
 #Unsere generierten Vektoren sind sogar orthogonal zum mean-shape.
 t(t[,1])%*%as.vector(x)#10^-15
 
-#Ich habe Angst hier durcheinander zu kommen mit der Vektornotation von shapes und der Matrixnotation. 
-#Da ich oft die Matrix umschrieben muss als Vektor, aber ich mir nicht sicher bin ob zeilenweise oder spaltenweise. Tipp?
-
-#Addiere mean shape
-for(i in 1:10){w[,i]<-x+t[,i]}
-
-#Erhalte 10 shapes im Tangentialraum. Tada.
-w
-
 z <- array(0,c(8,2,10))
-#Und damit 10 shapes auf meinem shape space
+#10 shapes auf meinem shape space
 for(i in 1:10){z[,,i]<-expo(x,t[,i])}
 
-#Wenn alles richtig ist habe ich nun mittels der PCs aus gorf.dat und der neuen Kovarianzmatrix neue shapes simuliert.
-#Sieht sogar so ähnlich aus wie gorf.dat. 
+#Vergleiche die plots der generierten shapes mit den Beispielashapes
 plotshapes(z)
 plotshapes(proc$rotated[,,1:10])
-#Umso geringer die Varianzen, desto ähnlicher werden die shapes dem mean shape
-#Wieder die Frage: Wie plotte ich das in einem Fenster?
-
-#Nun gilt es mit den simulierten Daten den Fehler der orthogonalen Projektion zu bestimmen.
+#Wie plotte ich das in einem Fenster?
 
 
-#Hier erstmal den mit log bestimmten exakten Wert von z im Tangentialraum. 
+#Bestimmung des Fehlers der orthogonalen Projektion mittels simulierten Daten:
+
+#Der mit log bestimmte exakten Wert von z im Tangentialraum. 
 z_t <- array(0,c(8,2,10))
 for(i in 1:10){z_t[,,i]<-loga(x,z[,,i])}
 
+#Falls die Länge meiner Vektoren länger als pi/2 wird, amcht dies keinen Sinn mehr.
+for(i in 1:10){message(norm_vec(t[,i]))}
+
 #Exakter Wert von z_t hat eine Abweichung von 10^-16 (verursacht von log(exp())).
-as.vector(z_t[,,2])-t[,2]
+#as.vector(z_t[,,9])-t[,9]
 
 #Damit folgt für den shape im Tangentialraum:
 z_exakt<-array(0,c(8,2,10))
@@ -208,11 +200,9 @@ z_orp <- Morpho:::orp(z, mshape =x)
 plotshapes(z_orp)
 plotshapes(z_exakt)
 
-#Die aktuelle Differenz von z_orp und dem exakten Wert des shapes im Tangentialraum.
-norm_arr(z_orp[,,2])-norm_arr(z_exakt[,,2])
+#Der Abstand von z_orp und dem exakten Wert des shapes im Tangentialraum.
+for(i in 1:10){message(norm_arr(z_orp[,,i])-norm_arr(z_exakt[,,i]))}
 
-#oder in Koordinaten:
-z_orp[,,2]-(z_exakt[,,2])
 #Damit wäre die Abweichung der orthogonalen Projektion gezeigt. 
 #Dies kann man für unterschiedlichstes cov ausführen und somit 
 #stärkere Abweichungen für größere Varianz und schwäche Abweichungen für geringere Varianz feststellen.
