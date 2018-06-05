@@ -134,8 +134,11 @@ t(proc$PCs[,2])%*%as.vector(x)#skalarprodukt von mean shape und PC. 10^-16
 e<-array(0,c(12,10))
 for(i in 1:10){e[,i]<-as.vector(rnorm(12,mean=0,sd=1))}
 
-#12x12 Kovarianzmatrix mit Bsp.: 0.5 auf Diagonalen
+#12x12 Kovarianzmatrix mit Bsp.: 0.03 auf Diagonalen
 cov<-diag(rep(0.03,times=12))
+
+#oder 0.05
+cov<-diag(c(0.5,rep(0.05,times=11)))
 
 #Multipliziere jeden generierten Zufallsvektor aus e mit cov und erhalte neue Vektoren 
 #die verteilt sind zu N(0,cov*t(cov))
@@ -180,14 +183,14 @@ for(i in 1:10){z[,,i]<-expo(x,t[,i])}
 #Sieht sogar so ähnlich aus wie gorf.dat. 
 plotshapes(z)
 plotshapes(proc$rotated[,,1:10])
-#Umso geringer die Varianzen, desto genauer werden die shapes.
+#Umso geringer die Varianzen, desto ähnlicher werden die shapes dem mean shape
 #Wieder die Frage: Wie plotte ich das in einem Fenster?
 
 #Nun gilt es mit den simulierten Daten den Fehler der orthogonalen Projektion zu bestimmen.
 #Wie bestimme ich nun die orthogonale Projektion von z? 
 #....
 
-v_orp
+
 
 
 
