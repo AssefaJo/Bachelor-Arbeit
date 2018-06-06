@@ -64,7 +64,7 @@ loga <- function(x,y){
 
 
 data(gorf.dat)
-
+plotshapes(gorf.dat[,,1:3])
 #Performing Procrustes Superimposition on gorf.dat
 proc <- procSym(gorf.dat,orp=TRUE)
 
@@ -132,16 +132,13 @@ t(proc$PCs[,2])%*%as.vector(x)#skalarprodukt von mean shape und PC. 10^-16
 
 #Generiere array e mit 10 normalverteilten 12-dimensionalen Vektoren, die verteilt sind zu N(0,id).
 e<-array(0,c(12,10))
+
 for(i in 1:10){e[,i]<-as.vector(rnorm(12,mean=0,sd=1))}
 
-#12x12 Kovarianzmatrix mit Bsp.: 0.03 auf Diagonalen
-cov<-diag(rep(0.1,times=12))
+#12x12 Kovarianzmatrix
+cov<-diag(rep(0.01,times=12))
 
-#oder 0.05
-#cov<-diag(c(0.8,rep(0.05,times=11)))
-
-#Multipliziere jeden generierten Zufallsvektor aus e mit cov und erhalte neue Vektoren 
-#die verteilt sind zu N(0,cov*t(cov))
+#E ist zu N(0,cov*t(cov)) verteilt
 E<-array(0,c(12,10))
 for(i in 1:10){E[,i]<-cov%*%e[,i]}
 
@@ -164,7 +161,7 @@ t<-array(0,c(16,10))
 for(j in 1:10){for(i in 1:12){t[,j]<-t[,j]+(b[,i]*E[i,j])}}
 
 #Unsere generierten Vektoren sind sogar orthogonal zum mean-shape.
-t(t[,1])%*%as.vector(x)#10^-15
+#t(t[,5])%*%as.vector(x)#10^-15
 
 z <- array(0,c(8,2,10))
 #10 shapes auf meinem shape space
@@ -184,9 +181,6 @@ for(i in 1:10){z_t[,,i]<-loga(x,z[,,i])}
 
 #Falls die Länge meiner Vektoren länger als pi/2 wird, amcht dies keinen Sinn mehr.
 for(i in 1:10){message(norm_vec(t[,i]))}
-
-#Exakter Wert von z_t hat eine Abweichung von 10^-16 (verursacht von log(exp())).
-#as.vector(z_t[,,9])-t[,9]
 
 #Damit folgt für den shape im Tangentialraum:
 z_exakt<-array(0,c(8,2,10))
@@ -214,7 +208,7 @@ cov_o<-matrix(0,nrow = 16,ncol = 16)
 #Kovarianzmatrix von den exakten und orthogonalen shapes
 for(i in 1:10){cov_e<-cov_e+(1/10)*(as.vector(z_exakt[,,i]-x)%*%t(as.vector(z_exakt[,,i]-x)))}
 for(i in 1:10){cov_o<-cov_o+(1/10)*(as.vector(z_orp[,,i]-x)%*%t(as.vector(z_orp[,,i]-x)))}
-
+cov%*%t(cov)
 #Spectral Composition
 EDe<-eigen(cov_e)
 EDo<-eigen(cov_o)
