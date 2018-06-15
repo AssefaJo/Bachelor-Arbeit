@@ -64,17 +64,17 @@ loga <- function(x,y){
 
 
 data(gorf.dat)
-plotshapes(gorf.dat[,,1:3])
-#Performing Procrustes Superimposition on gorf.dat
-proc <- procSym(gorf.dat,orp=TRUE)
+plotshapes(gorf.dat[,,1:30])
 
+#Procrustes Superimposition
+proc <- procSym(gorf.dat,orp=TRUE)
+plotshapes(proc$rotated[,,1:30])
 #Mean shape x
 x <- proc$mshape
 
 #Beispielshape
 y <- proc$rotated[,,8]
 y_orp <- proc$orpdata[,,8]
-
 
 
 #Beispielrechnungen:
@@ -212,7 +212,7 @@ cov%*%t(cov)
 #Spectral Composition
 EDe<-eigen(cov_e)
 EDo<-eigen(cov_o)
-
+#asd
 #Untersuchung der Eigenwerte
 EDe$values
 EDo$values
