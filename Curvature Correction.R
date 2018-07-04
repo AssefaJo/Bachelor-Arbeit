@@ -4,7 +4,7 @@ library(Morpho)
 
 norm_vec <- function(x) sqrt(sum(x^2))
 
-#Gibt die euklidische Norm eines 2d-arrays zurück
+#Gibt die euklidische Norm eines 2d-arrays zurückkk
 norm_arr <- function(x) norm_vec(as.vector(x))
 
 #Exponentialabbilung
