@@ -82,7 +82,7 @@ norm_arr(y)
 #Tangentialvektor von x
 v_orp <- y_orp-x
 
-v_orp - loga(x,expo(x,v_orp))
+v_orp - loga(x,expo(x,as.vector(v_orp)))
 y - expo(x,loga(x,y))
 #Identität Abweichung 10^-16
 
@@ -102,35 +102,43 @@ plotshapes(x+loga(x,proc$rotated[,,3]))
 
 
 #Simulation von shapes im Tangentialraum:
-N=11
-#Generiere array e mit N standardnormalverteilten 12-dimensionalen Vektoren
-e<-array(0,c(12,N))
+N=10
+d=12
+c=d-1
+#Generiere array e mit N standardnormalverteilten d-dimensionalen Vektoren
+e<-array(0,c(c,N))
 
-for(i in 1:N){e[,i]<-as.vector(rnorm(12,mean=0,sd=1))}
+for(i in 1:N){e[,i]<-as.vector(rnorm(c,mean=0,sd=1))}
 
 #12x12 Kovarianzmatrix
-cov<-diag(rep(0.04,times=12))
+cov<-diag(rep(0.2,times=c))
 
 #E ist zu N(0,cov*t(cov)) verteilt
-E<-array(0,c(12,N))
+E<-array(0,c(c,N))
 for(i in 1:N){E[,i]<-cov%*%e[,i]}
 
 E
 #Basis b von T_xM mit PCs:
-b<-proc$PCs
-
+#Dimension der Basisvektoren
+b<-diag(rep(1,times=d))[,-d]
+b
+#b<-proc$PCs
 #Erhalte nun einen pre shape X im Tangentialraum aus Linearkombination:
 #Erstelle leeres 16 dim. array
-w<-array(0,c(16,N))
-t<-array(0,c(16,N))
-
+t<-array(0,c(d,N))
 #t<-(b_1 * E_11 + .. + b_m* E_m1)
-for(j in 1:N){for(i in 1:12){t[,j]<-t[,j]+(b[,i]*E[i,j])}}
+x<-array(c(rep(0,times=d-1),1), c(d/2,2))
+x
+b
+t
 
+for(j in 1:N){for(i in 1:c){t[,j]<-t[,j]+(b[,i]*E[i,j])}}
+
+t
 #Unsere generierten Vektoren sind sogar orthogonal zum mean-shape.
 #t(t[,5])%*%as.vector(x)#10^-15
-z
-z <- array(0,c(8,2,N))
+#x <- cbind(c(1,0),c(0,0))
+z <- array(0,c(d/2,2,N))
 #10 shapes auf meinem pre shape space
 for(i in 1:N){z[,,i]<-expo(x,t[,i])}
 
@@ -139,22 +147,23 @@ plotshapes(z)
 plotshapes(proc$rotated[,,1:N])
 #Wie plotte ich das in einem Fenster?
 
-
 #Bestimmung des Fehlers der orthogonalen Projektion mittels simulierten Daten:
 
 #Der mit log bestimmte exakten Wert von z im Tangentialraum. 
-z_t <- array(0,c(8,2,N))
+z_t <- array(0,c(d/2,2,N))
 for(i in 1:N){z_t[,,i]<-loga(x,z[,,i])}
 
 #Falls die Länge meiner Vektoren länger als pi/2=1.57 wird, macht dies keinen Sinn mehr.
 for(i in 1:N){message(norm_vec(t[,i]))}
 
 #Damit folgt für den shape im Tangentialraum:
-z_exakt<-array(0,c(8,2,N))
+z_exakt<-array(0,c(d/2,2,N))
 for(i in 1:N){z_exakt[,,i]<-z_t[,,i]+x}
 
+z_orp<-z
 #Projiziere z orthogonal in den Tangentialraum von x
-z_orp <- Morpho:::orp(z, mshape =x)
+for (i in 1:N) {z_orp[d/2,2,i]<-1}
+
 
 #In den zwei plots sieht man den Unterschied von z_orp und z
 plotshapes(z_orp)
@@ -162,8 +171,8 @@ plotshapes(z_exakt)
 
 #Der Abstand von z_orp und dem exakten Wert des shapes im Tangentialraum.
 for(i in 1:N){message(norm_arr(z_orp[,,i]-z_exakt[,,i]))}
-
-
+z[,,1]
+as.vector(z[,,1])
 #Damit wäre die Abweichung der orthogonalen Projektion gezeigt. 
 #Dies kann man für unterschiedlichstes cov ausführen und somit 
 #stärkere Abweichungen für größere Varianz und schwäche Abweichungen für geringere Varianz feststellen.
