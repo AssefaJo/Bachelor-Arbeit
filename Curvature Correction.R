@@ -23,11 +23,10 @@ expo <- function(x,v){
   
   #Berechnung des k*m dimensionalen shapes als vektor
   e <- cos(nv)*x_vec+((sin(nv)*nx)/nv)*v_vec
-    
+  e 
   #Umwandlung in ein 2D array    
-  matrix(e, nrow = k, ncol = m, byrow=FALSE)
+  #matrix(e, nrow = k, ncol = m, byrow=FALSE)
 }  
-  
   
 
 #Riemannscher Logarithmus
@@ -57,15 +56,15 @@ loga <- function(x,y){
   
   #Berechnung und Ausgabe des Vektors im Tangentialraum von x
   vec<-(t*(y_vec-pi))/norm_vec(y_vec-pi)
-  
+  vec
   #Umwandlung in ein 2D array
-  matrix(vec, nrow = k, ncol = m, byrow=FALSE)
+  #matrix(vec, nrow = k, ncol = m, byrow=FALSE)
 }
 
 
 data(gorf.dat)
 plotshapes(gorf.dat[,,1:30])
-
+procSym
 #Procrustes Superimposition
 proc <- procSym(gorf.dat,orp=TRUE,scale=F)
 plotshapes(proc$rotated[,,1:30])
@@ -99,99 +98,89 @@ deformGrid2d(proc$mshape,proc$rotated[,,1],wireframe = c(1,6:2,8:6))
 plotshapes(proc$orpdata[,,3])
 plotshapes(x+loga(x,proc$rotated[,,3]))
 
-
-
-#Simulation von shapes im Tangentialraum:
-N=10
-d=12
-c=d-1
-#Generiere array e mit N standardnormalverteilten d-dimensionalen Vektoren
-e<-array(0,c(c,N))
-
-for(i in 1:N){e[,i]<-as.vector(rnorm(c,mean=0,sd=1))}
-
-#12x12 Kovarianzmatrix
-cov<-diag(rep(0.2,times=c))
-
-#E ist zu N(0,cov*t(cov)) verteilt
-E<-array(0,c(c,N))
-for(i in 1:N){E[,i]<-cov%*%e[,i]}
-
-E
-#Basis b von T_xM mit PCs:
-#Dimension der Basisvektoren
-b<-diag(rep(1,times=d))[,-d]
-b
-#b<-proc$PCs
-#Erhalte nun einen pre shape X im Tangentialraum aus Linearkombination:
-#Erstelle leeres 16 dim. array
-t<-array(0,c(d,N))
-#t<-(b_1 * E_11 + .. + b_m* E_m1)
-x<-array(c(rep(0,times=d-1),1), c(d/2,2))
-x
-b
-t
-
-for(j in 1:N){for(i in 1:c){t[,j]<-t[,j]+(b[,i]*E[i,j])}}
-
-t
-#Unsere generierten Vektoren sind sogar orthogonal zum mean-shape.
-#t(t[,5])%*%as.vector(x)#10^-15
-#x <- cbind(c(1,0),c(0,0))
-z <- array(0,c(d/2,2,N))
-#10 shapes auf meinem pre shape space
-for(i in 1:N){z[,,i]<-expo(x,t[,i])}
-
-#Vergleiche die plots der generierten shapes mit den Beispielashapes
-plotshapes(z)
-plotshapes(proc$rotated[,,1:N])
-#Wie plotte ich das in einem Fenster?
-
-#Bestimmung des Fehlers der orthogonalen Projektion mittels simulierten Daten:
-
-#Der mit log bestimmte exakten Wert von z im Tangentialraum. 
-z_t <- array(0,c(d/2,2,N))
-for(i in 1:N){z_t[,,i]<-loga(x,z[,,i])}
-
-#Falls die Länge meiner Vektoren länger als pi/2=1.57 wird, macht dies keinen Sinn mehr.
-for(i in 1:N){message(norm_vec(t[,i]))}
-
-#Damit folgt für den shape im Tangentialraum:
-z_exakt<-array(0,c(d/2,2,N))
-for(i in 1:N){z_exakt[,,i]<-z_t[,,i]+x}
-
-z_orp<-z
-#Projiziere z orthogonal in den Tangentialraum von x
-for (i in 1:N) {z_orp[d/2,2,i]<-1}
-
-
-#In den zwei plots sieht man den Unterschied von z_orp und z
-plotshapes(z_orp)
-plotshapes(z_exakt)
-
-#Der Abstand von z_orp und dem exakten Wert des shapes im Tangentialraum.
-for(i in 1:N){message(norm_arr(z_orp[,,i]-z_exakt[,,i]))}
-z[,,1]
-as.vector(z[,,1])
-#Damit wäre die Abweichung der orthogonalen Projektion gezeigt. 
-#Dies kann man für unterschiedlichstes cov ausführen und somit 
-#stärkere Abweichungen für größere Varianz und schwäche Abweichungen für geringere Varianz feststellen.
-
-cov_e<-matrix(0,nrow = 16,ncol = 16)
-cov_o<-matrix(0,nrow = 16,ncol = 16)
-
-# mit den simulierten Daten erhalten wir eine 16x16 kovarianzmatrix.
-#Unsere ursprüngliche zu schätzende kovarianzmatrix ist aber 12x12. 
-#?
-
-#Kovarianzmatrix von den exakten und orthogonalen shapes
-for(i in 1:10){cov_e<-cov_e+(1/10)*(as.vector(z_exakt[,,i]-x)%*%t(as.vector(z_exakt[,,i]-x)))}
-for(i in 1:10){cov_o<-cov_o+(1/10)*(as.vector(z_orp[,,i]-x)%*%t(as.vector(z_orp[,,i]-x)))}
-cov%*%t(cov)
-#Spectral Composition
-EDe<-eigen(cov_e)
-EDo<-eigen(cov_o)
-
-#Untersuchung der Eigenwerte
-EDe$values
-EDo$values
+#Funktion zur Schätzung der Kovarainzmatrix von 
+#normalverteilten pre-Shapes mit vorgegebener Kovarianz im Tangentialraum
+#einmal exakt und einmal orthogonal projiziert
+pca <- function(N,dimL=2,Landmarks=3,derivation=0.3){
+  
+  #Dimension des Pre-Shape Space
+  d=dimL*(Landmarks-1)
+  
+  #Dimension des Tangentialraums
+  c=d-1
+  
+  #Generiere array e mit N standardnormalverteilten d-dimensionalen Vektoren
+  e<-array(0,c(c,N))
+  
+  for(i in 1:N){e[,i]<-as.vector(rnorm(c,mean=0,sd=1))}
+  
+  #c\times c Kovarianzmatrix
+  cov<-diag(rep(derivation,times=c))
+  #E ist zu N(0,cov*t(cov)) verteilt
+  E<-array(0,c(c,N))
+  for(i in 1:N){E[,i]<-cov%*%e[,i]}
+  
+  
+  #Basis b von T_xM mit PCs:
+  #Dimension der Basisvektoren
+  b<-diag(rep(1,times=d))[,-d]
+  
+  #b<-proc$PCs
+  #Erhalte nun einen pre shape X im Tangentialraum aus Linearkombination:
+  #Erstelle leeres 16 dim. array
+  t<-array(0,c(d,N))
+  #t<-(b_1 * E_11 + .. + b_m* E_m1)
+  x<-array(c(rep(0,times=d-1),1))
+  
+  x
+  for(j in 1:N){for(i in 1:c){t[,j]<-t[,j]+(b[,i]*E[i,j])}}
+  
+  #Unsere generierten Vektoren sind sogar orthogonal zum mean-shape.
+  #t(t[,5])%*%as.vector(x)#10^-15
+  #x <- cbind(c(1,0),c(0,0))
+  z <- array(0,c(d,N))
+  #10 shapes auf meinem pre shape space
+  for(i in 1:N){z[,i]<-expo(x,t[,i])}
+  
+  #Bestimmung des Fehlers der orthogonalen Projektion mittels simulierten Daten:
+  
+  #Der mit log bestimmte exakten Wert von z im Tangentialraum. 
+  z_l <- array(0,c(d,N))
+  for(i in 1:N){z_l[,i]<-loga(x,z[,i])}
+  #Falls die Länge meiner Vektoren länger als pi/2=1.57 wird, macht dies keinen Sinn mehr.
+  #for(i in 1:N){message(norm_vec(t[,i]))}
+  
+  #Damit folgt für den shape im Tangentialraum:
+  z_exakt<-array(0,c(d,N))
+  for(i in 1:N){z_exakt[,i]<-z_l[,i]+x}
+  
+  z_orp<-z
+  #Projiziere z orthogonal in den Tangentialraum von x
+  for (i in 1:N) {z_orp[d,i]<-1}
+  
+  #Transferiere die orthogonalen Shapes in Koordinaten wieder in den Tangentialraum
+  z_ovec<-array(0,c(d-1,N))
+  for (i in 1:N) {z_ovec[,i]<-z_orp[,i][-d]}
+  
+  #Die Tangentialvektoren der exakten shapes sind in Koordinaten grade E
+  z_evec<-E
+  #In den zwei plots sieht man den Unterschied von z_orp und z
+  
+  cov_e<-matrix(0,nrow = c,ncol = c)
+  cov_o<-matrix(0,nrow = c,ncol = c)
+  
+  
+  #Kovarianzmatrix von den exakten und orthogonalen shapes
+  for(i in 1:N){cov_e<-cov_e+(1/N)*(z_evec[,i]%*%t(z_evec[,i]))}
+  for(i in 1:N){cov_o<-cov_o+(1/N)*(z_ovec[,i]%*%t(z_ovec[,i]))}
+  
+  EDe<-eigen(cov_e)
+  EDo<-eigen(cov_o)
+  A<-EDe$vectors%*%diag(sqrt(EDe$values))%*%t(EDe$vectors)
+  B<-EDo$vectors%*%diag(sqrt(EDo$values))%*%t(EDo$vectors)
+  
+  out= (list(Cov_ex = A,Cov_ap = B,cov = cov))
+  return(out)
+}
+pca(100000,derivation=0.3)
+procSym(gorf.dat)
