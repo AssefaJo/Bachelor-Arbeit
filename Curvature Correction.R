@@ -23,7 +23,7 @@ expo <- function(x,v){
   
   #Berechnung des k*m dimensionalen shapes als vektor
   e <- cos(nv)*x_vec+((sin(nv)*nx)/nv)*v_vec
-  e 
+  e
   #Umwandlung in ein 2D array    
   #matrix(e, nrow = k, ncol = m, byrow=FALSE)
 }  
@@ -61,42 +61,6 @@ loga <- function(x,y){
   #matrix(vec, nrow = k, ncol = m, byrow=FALSE)
 }
 
-
-data(gorf.dat)
-plotshapes(gorf.dat[,,1:30])
-procSym
-#Procrustes Superimposition
-proc <- procSym(gorf.dat,orp=TRUE,scale=F)
-plotshapes(proc$rotated[,,1:30])
-#Mean shape x
-x <- proc$mshape
-
-#Beispielshape
-y <- proc$rotated[,,8]
-y_orp <- proc$orpdata[,,8]
-norm_arr(y)
-
-#Beispielrechnungen:
-
-#Tangentialvektor von x
-v_orp <- y_orp-x
-
-v_orp - loga(x,expo(x,as.vector(v_orp)))
-y - expo(x,loga(x,y))
-#Identität Abweichung 10^-16
-
-(x+loga(x,y))-proc$orpdata[,,8]#10^-5
-#Abweichung des mit log berechneten, exakten shapes im Tangentialraum von der othogonalen Projektion im Tangentialraum.
-
-
-plotshapes(gorf.dat[,,3:15])
-plotshapes(proc$rotated[,,3:15], color = 3)
-deformGrid2d(proc$orpdata[,,3],x+loga(x,proc$rotated[,,3]),wireframe = c(1,6:2,8:6))
-deformGrid2d(proc$mshape,proc$rotated[,,1],wireframe = c(1,6:2,8:6))
-
-#Folgende plots gilt es zu vergleichen:
-plotshapes(proc$orpdata[,,3])
-plotshapes(x+loga(x,proc$rotated[,,3]))
 
 #Funktion zur Schätzung der Kovarainzmatrix von 
 #normalverteilten pre-Shapes mit vorgegebener Kovarianz im Tangentialraum
@@ -182,5 +146,69 @@ pca <- function(N,dimL=2,Landmarks=3,derivation=0.3){
   out= (list(Cov_ex = A,Cov_ap = B,cov = cov))
   return(out)
 }
-pca(100000,derivation=0.3)
+pca(10000,derivation=0.01)
 procSym(gorf.dat)
+
+
+
+
+
+
+N=10
+d=4
+c=d-1
+e<-array(0,c(c,N))
+
+for(i in 1:N){e[,i]<-as.vector(rnorm(c,mean=0,sd=1))}
+
+#c\times c Kovarianzmatrix
+cov<-diag(rep(0.01,times=c))
+#E ist zu N(0,cov*t(cov)) verteilt
+E<-array(0,c(c,N))
+for(i in 1:N){E[,i]<-cov%*%e[,i]}
+
+
+#Basis b von T_xM mit PCs:
+#Dimension der Basisvektoren
+b<-diag(rep(1,times=d))[,-d]
+
+#b<-proc$PCs
+#Erhalte nun einen pre shape X im Tangentialraum aus Linearkombination:
+#Erstelle leeres 16 dim. array
+t<-array(0,c(d/2,2,N))
+#t<-(b_1 * E_11 + .. + b_m* E_m1)
+x<-array(c(rep(0,times=d-1),1),c(d/2,2))
+
+x
+for(j in 1:N){for(i in 1:c){t[,,j]<-t[,,j]+(b[,i]*E[i,j])}}
+t
+#Unsere generierten Vektoren sind sogar orthogonal zum mean-shape.
+#t(t[,5])%*%as.vector(x)#10^-15
+#x <- cbind(c(1,0),c(0,0))
+z <- array(0,c(d/2,2,N))
+#10 shapes auf meinem pre shape space
+for(i in 1:N){z[,,i]<-expo(x,t[,,i])}
+z
+#Bestimmung des Fehlers der orthogonalen Projektion mittels simulierten Daten:
+
+#Der mit log bestimmte exakten Wert von z im Tangentialraum. 
+z_l <- array(0,c(d,N))
+for(i in 1:N){z_l[,i]<-loga(x,z[,i])}
+#Falls die Länge meiner Vektoren länger als pi/2=1.57 wird, macht dies keinen Sinn mehr.
+#for(i in 1:N){message(norm_vec(t[,i]))}
+z_l
+z
+#Damit folgt für den shape im Tangentialraum:
+z_exakt<-array(0,c(d,N))
+for(i in 1:N){z_exakt[,i]<-z_l[,i]+x}
+Morpho:::orp(z,mshape=x)[,,2]
+z_orp<-z
+#Projiziere z orthogonal in den Tangentialraum von x
+for (i in 1:N) {z_orp[d,i]<-1}
+
+#Transferiere die orthogonalen Shapes in Koordinaten wieder in den Tangentialraum
+z_ovec<-array(0,c(d-1,N))
+for (i in 1:N) {z_ovec[,i]<-z_orp[,i][-d]}
+
+#Die Tangentialvektoren der exakten shapes sind in Koordinaten grade E
+z_evec<-E
