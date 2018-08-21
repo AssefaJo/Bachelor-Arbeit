@@ -1,5 +1,4 @@
 library(matlib)
-library(shapes)
 library(Morpho)
 norm_vec <- function(x) sqrt(sum(x^2))
 

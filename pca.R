@@ -153,7 +153,7 @@ pca <- function(N,dimL=2,Landmarks=3,r=0.2){
 #Plots:
 
 #4.1
-deriv<-seq(0.01,0.35,0.002)
+deriv<-seq(0.01,0.30,0.002)
 x<-rep(0,times=length(deriv))
 for (k in 1:length(deriv)) {
   x[k]<-pca(1000,r = deriv[k])$Differenz
